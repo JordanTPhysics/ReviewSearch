@@ -17,14 +17,9 @@ from nltk.corpus import movie_reviews
 import random
 
 
-ReviewList = []
+ReviewList = open('output10.txt')
 
-ReviewList.append(open('amazonReviews/negative/r1.txt', 'r'))
-ReviewList.append(open('amazonReviews/negative/r2.txt', 'r'))
-ReviewList.append(open('amazonReviews/negative/r3.txt', 'r'))
-ReviewList.append(open('amazonReviews/positive/r4.txt', 'r'))
-ReviewList.append(open('amazonReviews/positive/r5.txt', 'r'))
-ReviewList.append(open('amazonReviews/positive/r6.txt', 'r'))
+
 
 
 
