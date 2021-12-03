@@ -12,6 +12,7 @@ import selenium as sl
 from selenium import webdriver
 import time as t
 from selenium.webdriver.common.by import By
+import csv
 #from selenium.common.keys import Keys
 #PATH = "C:/Program Files (x86)/chromedriver.exe"
 
@@ -23,54 +24,56 @@ driver = webdriver.Chrome('chromedriver.exe')
 
 driver.get("https://www.customerservicescoreboard.com/NetFlix")
 t.sleep(1)
-
-##collecting negative reviews
-for page in range (10):
-    reviewDatesN = driver.find_elements(By.XPATH,"//span[@class='dtreviewed']")
-    reviewContentsN = driver.find_elements(By.XPATH,"//span[@class='description item']")
-    link_text = "/NetFlix/negative/?page="+str(page+2)
-    nextPage = driver.find_element(By.PARTIAL_LINK_TEXT,link_text)
-    nextPage.click()
-    Alert = driver.switch_to().alert().dismiss()
-
 contentsN = []
 datesN = []
+neg = [] 
+##collecting negative reviews
+for page in range (4):
+    reviewDatesN = driver.find_elements(By.XPATH,"//span[@class='dtreviewed']")
+    reviewContentsN = driver.find_elements(By.XPATH,"//span[@class='description item']")
+    for i in reviewDatesN:
+        dateN = i.text
+        datesN.append(dateN)
+    for i in reviewContentsN:
+        contentN = i.text
+        contentsN.append(contentN)
+        neg.append("neg")
+    pagenum = str(page+2)
+    driver.get("https://www.customerservicescoreboard.com/NetFlix/negative/?page="+pagenum)
+    
 
-for i in reviewDatesN:
-    dateN = i.text
-    datesN.append(dateN)
-    
-for i in reviewContentsN:
-    contentN = i.text
-    contentsN.append(contentN)
-    
-reviewsNegative = zip(datesN,contentsN)
+reviewsNegative = zip(datesN,contentsN,neg)
 reviewsNegativeList = list(reviewsNegative)
 
 ##collecting positive reviews
-positiveSwitch = driver.find_element(By.XPATH,"/html/body/div[1]/div/div/div/div[1]/div/ul/li[2]")
-#for page in pages:
-reviewDatesP = driver.find_elements(By.XPATH,"//span[@class='dtreviewed']")
-reviewContentsP = driver.find_elements(By.XPATH,"//span[@class='description item']")
-
-    #nextPage = driver.find_element(By.CLASS_NAME,"nav-next")
-    #nextPage.click()
-
+driver.get("https://www.customerservicescoreboard.com/NetFlix")
+positiveSwitch = driver.find_element(By.XPATH,"//a[contains(text(),'Positive')]")
+positiveSwitch.click()
 contentsP = []
 datesP = []
-
-for i in reviewDatesP:
-    dateP = i.text
-    datesP.append(dateP)
+pos = [] 
+for page in range (4):
+    reviewDatesP = driver.find_elements(By.XPATH,"//span[@class='dtreviewed']")
+    reviewContentsP = driver.find_elements(By.XPATH,"//span[@class='description item']")
+    for i in reviewDatesP:
+        dateP = i.text
+        datesP.append(dateP)
+   
+    for i in reviewContentsP:
+        pos.append("pos")
+        contentP = i.text
+        contentsP.append(contentP)
+    pagenum = str(page+2)
+    driver.get("https://www.customerservicescoreboard.com/NetFlix/positive/?page="+pagenum)
     
-for i in reviewContentsP:
-    contentP = i.text
-    contentsP.append(contentP)
     
-reviewsPositive = zip(datesP,contentsP)
+reviewsPositive = zip(datesP,contentsP,pos)
 reviewsPositiveList = list(reviewsPositive)
-
-
+#reviewsCSV = reviewsPositive + reviewsNegative
+allReviews = reviewsNegativeList + reviewsPositiveList
+with open('reviewdata.csv','w') as out:
+    csv_out=csv.writer(out)
+    csv_out.writerows(allReviews)
 t.sleep(1)
 
 driver.quit()

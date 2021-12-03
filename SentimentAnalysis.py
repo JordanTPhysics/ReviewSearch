@@ -6,25 +6,26 @@ a classifier I found online, for training purposes
 @author: starg
 We want to automate review collection from websites like amazon, collect the rating,
 the date of the review, and the number of people who echo the review contents.
-This word processor will then take the reviews and will be able to categorize good and bad reviews,
+We will train the Naive Bayes classifier by showing it examples of negative and positive reviews,
+then it should be able to classify additional data we input.
 then display a word frequency chart detailing the common words and phrases found in positive and
  negative reviews respectively
 
 """
-//
+
 
 import nltk
 from nltk.corpus import movie_reviews
 import random
 
 
-ReviewList = open('output10.txt')
 
 
 
 
 
-#lists out all of the documents and categorizes them
+
+#lists out all of the documents each doc is a tuple with a class of 'pos' or neg'
 documents=[(list(movie_reviews.words(fileid)), category) 
             for category in movie_reviews.categories()
             for fileid in movie_reviews.fileids(category)]
