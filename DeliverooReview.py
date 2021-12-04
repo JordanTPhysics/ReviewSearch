@@ -5,7 +5,7 @@ Created on Wed Dec  1 20:34:39 2021
 @author: starg
 """
 
-import nltk
+import nltk, re, pprint
 
 import random
 from nltk.corpus import stopwords
@@ -13,67 +13,107 @@ from nltk.tokenize import word_tokenize as wt
 from nltk.probability import FreqDist
 import matplotlib.pyplot as plt
 import csv
-
+from string import punctuation
 #from SeleniumSearch import allReviews
 import pandas as pd
 from nltk import sent_tokenize, word_tokenize, pos_tag
+from gensim.models import Word2Vec
 
 
-
-
-#reader = csv.reader(open('reviewdata.csv', 'rU'), delimiter= ",",quotechar='|')
+#import data as dataframe
 df = pd.read_csv(r'reviewdata.csv',header=[0])
-
-
-dict = {'Time': 'Date',
-		'Review': 'Content',
-		'Rating': 'Sentiment'}
-
-
-df.rename(columns=dict,
-		inplace=True)
-
-
-
-
-#documents=[(list(df.words()), category) 
-            #for category in df.neg()
-            #for fileid in df.fileids(category)]
-
-stopSet = set(nltk.corpus.stopwords.words('english'))
-xtraStops = []
-
-#stopSet.append(xtraStops)
-# Split the dataset by class values, returns a dictionary
-# def separate_by_class(allReviews):
-# 	separated = dict()
-# 	for i in range(len(allReviews)):
-# 		vector = allReviews[i]
-# 		class_value = vector[-1]
-# 		if (class_value not in separated):
-# 			separated[class_value] = list()
-# 		separated[class_value].append(vector)
-
-# 	return separated
+#remove null values from dataframe
+df.dropna(subset =["DATE","REVIEW"],inplace=True)
+#remove date column as it has no use in sentiment analysis
+del df['DATE']
+#dataframe to list
+allReviews = df.values.tolist()
+random.shuffle(allReviews)
+stopList = list(nltk.corpus.stopwords.words('english'))
 
 
 
-# word_tokens = wt(sets)
- 
-# filtered_sentence = [w for w in word_tokens if not w.lower() in stopSet]
 
-# features = {}
-#     #scans each document to find whether or not a given word was featured
-# for word in word_tokens:
-#    features['contains({})'.format(word)] = (word in filtered_sentence)
-       
-# classifier = nltk.NaiveBayesClassifier.train()   
-# print(nltk.classify.accuracy(classifier, filtered_sentence))  
-# classifier.show_most_informative_features(5)
+#extract the reviews from tuple
+reviews = []
+ratings = []
+for review, rating in allReviews:
+    reviews.append(review)
+    ratings.append(rating)
+    
+  
+    
+#tokenize each review   
+reviews_in_words = []  
+for review in reviews:
+    
+    tokens = wt(review)
+    reviews_in_words.append(tuple(tokens))
+     
+tokenized_and_tagged = zip(reviews_in_words,ratings)
 
-# freqDist = nltk.FreqDist(w.lower() for w in filtered_sentence)
+#retrieve each review as list of words all cat into single list   
+words = []
+for i in reviews_in_words:
+    for word in i:
+        words.append(word)
+        
+#remove stop words and punctuation from word list        
+filtered = []
+for w in words:
+    if w.casefold() not in punctuation and w not in stopList:
+        filtered.append(w)
+    
+    
+    
+#plot frequency distribution from most common
+all_words = nltk.FreqDist(filtered)
+all_words.plot(20, cumulative=False) 
+              
+                          
+#lists the 2000 most used words
+word_features = list(all_words)[:2000]
+def review_features(review):
+    review_words = set(review)
+    
+    features = {}
+    #scans each document to find whether or not a given word was featured
+    for word in word_features:
+        features['contains({})'.format(word)] = (word in review_words)
+        
+    return features
+    
+#for each document record which words featured and which class
+#(pos,neg) the document falls into
+featuresets = [(review_features(d), c) for (d,c) in tokenized_and_tagged]
+    
+train_set, test_set = featuresets[100:], featuresets[:100]  
 
-# freqDist.plot(20, cumulative=False);
+#trains the classifier to class reviews good and bad by showing it good and bad reviews.
+classifier =  nltk.NaiveBayesClassifier.train(train_set)
+
+
+print(nltk.classify.accuracy(classifier, test_set))
+#5 features most skewed to pos or neg  
+classifier.show_most_informative_features(5)
+
+
+vectorfilter = [] 
+for r in reviews_in_words:
+    if r not in stopList:
+        vectorfilter.append(r)
+
+#each word represented by a vector based on it's relation to other words
+netFlix_vec = Word2Vec(vectorfilter)
+
+print(netFlix_vec.wv.most_similar('bad',topn=6))
+print(netFlix_vec.wv.most_similar('good',topn=6))
+
+
+
+
+
+
 
 
  

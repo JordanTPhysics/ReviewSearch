@@ -32,7 +32,7 @@ documents=[(list(movie_reviews.words(fileid)), category)
     
 random.shuffle(documents)
 #displayes a lowercase frequency distribution of all the words detected in the documents
-all_words = nltk.FreqDist(w.lower() for w in movie_reviews.words())
+all_words = nltk.FreqDist(w.casefold() for w in movie_reviews.words())
 #lists the 2000 most used words
 word_features = list(all_words)[:2000]
 
