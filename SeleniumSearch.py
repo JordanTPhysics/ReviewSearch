@@ -14,9 +14,9 @@ import time as t
 from selenium.webdriver.common.by import By
 import csv
 #from selenium.common.keys import Keys
-#PATH = "C:/Program Files (x86)/chromedriver.exe"
 
-#chromedriver = open('chromedriver.exe', 'r').read()
+
+
 
 driver = webdriver.Chrome('chromedriver.exe')
 
@@ -69,7 +69,7 @@ for page in range (4):
     
 reviewsPositive = zip(datesP,contentsP,pos)
 reviewsPositiveList = list(reviewsPositive)
-#reviewsCSV = reviewsPositive + reviewsNegative
+
 allReviews = reviewsNegativeList + reviewsPositiveList
 with open('reviewdata.csv','w') as out:
     csv_out=csv.writer(out)

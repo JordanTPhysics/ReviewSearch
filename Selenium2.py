@@ -16,36 +16,42 @@ from selenium.webdriver.common.by import By
 
 driver = webdriver.Chrome('chromedriver.exe')
 
-
-
+reviewContents = []
+reviewDates = []
+starRating = []
+posneg = []
+pos = "pos"
+neg = "neg"
 driver.get("https://www.getapp.co.uk/reviews/2035411/whatsapp")
+t.sleep(1)
+cookies = driver.find_element(By.ID,"onetrust-accept-btn-handler")
+cookies.click()
+
+
+
 
 
 
 for page in range (10):
     reviewDates = driver.find_elements(By.XPATH,"//p[@class='small text-muted mb-3']")
-    reviewContentsP = driver.find_elements(By.CLASS_NAME,"small")
-    #reviewContentsN = driver.find_elements(By.XPATH,"//*[@id='apps']/div[3]/div[3]/div[1]/div/div[1]/div/div/div[1]/div[2]/div/div[2]/div/p/ ")
-    #link_text = "/reviews/2035411/whatsapp?page="+str(page+2)
-    #nextPage = driver.find_element(By.PARTIAL_LINK_TEXT,link_text)
-    #nextPage.click()
-    #Alert = driver.switch_to().alert().dismiss()
-
-contents = []
-dates = []
-
-for i in reviewDates:
-    date = i.text
-    dates.append(date)
+    reviewContents = driver.find_elements(By.XPATH,"//div[@class='jss511']")
     
-for i in reviewContentsP:
-    content = i.text
-    contents.append(content)
     
-reviewsNegative = zip(dates,contents)
-reviewsNegativeList = list(reviewsNegative)
-print(contents)
-
+    for i in reviewDates: 
+        reviewDates.append(i)
+        
+    
+    for i in reviewContents:
+        content = i.text
+        reviewContents.append(content)
+        if "Pros" in reviewContents:
+            posneg.append(pos)
+        else:
+            posneg.append(neg)     
+    
+    pagenum = str(page+2)
+    driver.get("https://www.getapp.com/customer-management-software/a/whatsapp/reviews/page-"+pagenum+"/")
+    t.sleep(1)
 
 
 driver.quit()

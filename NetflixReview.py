@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Dec  1 20:34:39 2021
-
+https://github.com/joeyajames/Python/blob/master/NLTK/NLTK.ipynb
 @author: starg
 """
 
 import nltk, re, pprint
 
 import random
-from nltk.corpus import stopwords
+import numpy as np
+
 from nltk.tokenize import word_tokenize as wt
 from nltk.probability import FreqDist
+from nltk.cluster import euclidean_distance, KMeansClusterer
 import matplotlib.pyplot as plt
 import csv
 from string import punctuation
@@ -106,10 +108,17 @@ for r in reviews_in_words:
 #each word represented by a vector based on it's relation to other words
 netFlix_vec = Word2Vec(vectorfilter)
 
+
+#6 most similar words to bad and good respectively
 print(netFlix_vec.wv.most_similar('bad',topn=6))
 print(netFlix_vec.wv.most_similar('good',topn=6))
 
 
+vectors = [np.array(f) for f in [[2, 1], [1, 3], [4, 7], [6, 7]]]
+means = [[4, 3], [5, 5]]
+
+clusterer = KMeansClusterer(2, euclidean_distance, initial_means=means)
+clusters = clusterer.cluster(vectors, True, trace=True)
 
 
 
