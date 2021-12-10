@@ -5,25 +5,25 @@ https://github.com/joeyajames/Python/blob/master/NLTK/NLTK.ipynb
 @author: starg
 """
 
-import nltk, re, pprint
+import nltk#, re, pprint
 
 import random
 import numpy as np
 
 from nltk.tokenize import word_tokenize as wt
-from nltk.probability import FreqDist
-from nltk.cluster import euclidean_distance, KMeansClusterer
 import matplotlib.pyplot as plt
-import csv
+#import csv
 from string import punctuation
-#from SeleniumSearch import allReviews
+from sklearn.decomposition import PCA
 import pandas as pd
-from nltk import sent_tokenize, word_tokenize, pos_tag
-from gensim.models import Word2Vec
+#from nltk import sent_tokenize, word_tokenize, pos_tag
+from gensim.models import Word2Vec#, KeyedVectors
+#from textblob import TextBlob
 
 
 #import data as dataframe
 df = pd.read_csv(r'reviewdata.csv',header=[0])
+df.columns=['DATE','REVIEW','RATING']
 #remove null values from dataframe
 df.dropna(subset =["DATE","REVIEW"],inplace=True)
 #remove date column as it has no use in sentiment analysis
@@ -32,18 +32,24 @@ del df['DATE']
 allReviews = df.values.tolist()
 random.shuffle(allReviews)
 stopList = list(nltk.corpus.stopwords.words('english'))
+stopList.extend(['Netflix','netflix','account','...','I'])
+stopList.extend(punctuation)
 
 
 
 
 #extract the reviews from tuple
-reviews = []
-ratings = []
-for review, rating in allReviews:
-    reviews.append(review)
-    ratings.append(rating)
+reviews = list(df['REVIEW'].values)
+ratings = list(df['RATING'].values)
+
     
-  
+def applystopwords(aReview):
+    aReview = list(aReview)
+    for token in aReview:
+       if token in stopList or token in punctuation:
+           aReview.remove(token)
+    
+    return aReview
     
 #tokenize each review   
 reviews_in_words = []  
@@ -51,25 +57,31 @@ for review in reviews:
     
     tokens = wt(review)
     reviews_in_words.append(tuple(tokens))
-     
+    #The following prints a number from 1 to -1 based on the sentiment of the text
+    #blob = TextBlob(review)
+    #sentiment = blob.sentiment.polarity
+    #print(sentiment)
 tokenized_and_tagged = zip(reviews_in_words,ratings)
 
 #retrieve each review as list of words all cat into single list   
-words = []
+filtered_reviews = []
 for i in reviews_in_words:
-    for word in i:
-        words.append(word)
+    filtered_reviews.append(applystopwords(i))
         
-#remove stop words and punctuation from word list        
-filtered = []
-for w in words:
-    if w.casefold() not in punctuation and w not in stopList:
-        filtered.append(w)
+   
+
     
+  
+
+TheReviews = list(df['REVIEW'].values)
+
+tokenized = [nltk.word_tokenize(review) for review in TheReviews]
     
-    
+model = Word2Vec(filtered_reviews, min_count=2, vector_size=32)
+model.wv.most_similar('happy')   
+
 #plot frequency distribution from most common
-all_words = nltk.FreqDist(filtered)
+all_words = nltk.FreqDist(filtered_reviews)
 all_words.plot(20, cumulative=False) 
               
                           
@@ -100,29 +112,32 @@ print(nltk.classify.accuracy(classifier, test_set))
 classifier.show_most_informative_features(5)
 
 
-vectorfilter = [] 
-for r in reviews_in_words:
-    if r not in stopList:
-        vectorfilter.append(r)
+
+
 
 #each word represented by a vector based on it's relation to other words
-netFlix_vec = Word2Vec(vectorfilter)
+
+
 
 
 #6 most similar words to bad and good respectively
-print(netFlix_vec.wv.most_similar('bad',topn=6))
-print(netFlix_vec.wv.most_similar('good',topn=6))
+print(model.wv.most_similar('good',topn=6))
+print(model.wv.most_similar('bad',topn=6))
+
+X = model.wv.index_to_key
 
 
-vectors = [np.array(f) for f in [[2, 1], [1, 3], [4, 7], [6, 7]]]
-means = [[4, 3], [5, 5]]
-
-clusterer = KMeansClusterer(2, euclidean_distance, initial_means=means)
-clusters = clusterer.cluster(vectors, True, trace=True)
-
-
-
-
+pca = PCA(n_components=2)
+result = pca.fit_transform(X)
+plt.scatter(result[:, 0], result[:, 1])
+wordvecs = model.wv.index_to_key
+for i, wordvec in enumerate(wordvecs):
+	plt.annotate(i, xy=(result[i, 0], result[i, 1]))
+plt.show()
 
 
- 
+
+
+
+
+
