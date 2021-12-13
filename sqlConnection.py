@@ -12,7 +12,10 @@ df = pd.read_csv(r'reviewdata.csv',header=[0])
 df.columns=['DATE','REVIEW','RATING']
 #remove null values from dataframe
 df.dropna(subset =["DATE","REVIEW"],inplace=True)
+datalist = df.values.tolist()
 
+
+    
 db = mysql.connector.connect(
     host="localhost",
     user="admin",
@@ -21,7 +24,7 @@ db = mysql.connector.connect(
 
 mycursor = db.cursor()
 
-add_query = "INSERT INTO reviewdata (review_date, content, rating) VALUES (%s,%s,%s)"
-mycursor.executemany(add_query, df)
+add_query = "INSERT INTO netflixdata (review_date, content, rating) VALUES (%s,%s,%s)"
+mycursor.executemany(add_query, datalist)
 db.commit()
 

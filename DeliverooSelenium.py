@@ -21,23 +21,26 @@ driver = webdriver.Chrome('chromedriver.exe')
 
 
 
-driver.get("https://apps.apple.com/us/app/deliveroo-food-delivery/id1001501844#see-all/reviews")
+driver.get("https://apps.apple.com/gb/app/apple-store/id375380948#see-all/reviews")
 t.sleep(1)
 contents = []
 dates = []
-
+ratings = []
 
 
 reviewDates = driver.find_elements(By.XPATH,"//time[@class='we-customer-review__date']")
-reviewContents = driver.find_elements(By.XPATH,"//p[@dir='ltr']")
+reviewContents = driver.find_elements(By.XPATH,"//div[@class='we-clamp']")
+reviewRatings = driver.find_elements(By.XPATH,"//figure[@class='we-star-rating we-customer-review__rating we-star-rating--large']")
+
 for i in reviewDates:
         date = i.text
         dates.append(date)
 for i in reviewContents:
         content = i.text
         contents.append(content)
-    
-    #pagenum = str(page+2)
+for i in reviewRatings:
+        source_code = i.get_attribute("outerHTML")
+        ratings.append(source_code[92])    
    
     
 
