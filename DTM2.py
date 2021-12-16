@@ -11,6 +11,8 @@ import pickle
 import pandas as pd
 import string
 from sklearn.feature_extraction.text import CountVectorizer
+import scipy
+from gensim import matutils, models
 
 
 df = pd.read_csv(r'reviewdata.csv',header=[0])
@@ -52,6 +54,17 @@ DTMvectors = vect.fit_transform(data_clean.REVIEW)
 
 td = pd.DataFrame(DTMvectors.todense()).iloc[:259]
 td.columns = vect.get_feature_names()
+
+sparse_counts = scipy.sparse.csr_matrix(td)
+corpus = matutils.Sparse2Corpus(sparse_counts)
+
+cv = pickle.load(open("cv_stop.pkl", "rb"))
+id2word = dict((v, k) for k, v in cv.vocabulary_.items())
+
+lda = models.LdaModel(corpus=corpus, id2word=id2word, num_topics=6, passes=10)
+lda.print_topics()
+
+
 
 
 

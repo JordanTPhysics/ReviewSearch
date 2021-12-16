@@ -6,13 +6,12 @@ Selenium in python time!!!!
 
 @author: starg
 """
-import numpy as np
-import matplotlib.pyplot as plt
-import selenium as sl
+
 from selenium import webdriver
 import time as t
 from selenium.webdriver.common.by import By
 import csv
+import pandas as pd
 
 
 
@@ -28,7 +27,7 @@ contentsN = []
 datesN = []
 neg = [] 
 ##collecting negative reviews
-for page in range (4):
+for page in range (10):
     reviewDatesN = driver.find_elements(By.XPATH,"//span[@class='dtreviewed']")
     reviewContentsN = driver.find_elements(By.XPATH,"//span[@class='description item']")
     for i in reviewDatesN:
@@ -52,7 +51,7 @@ positiveSwitch.click()
 contentsP = []
 datesP = []
 pos = [] 
-for page in range (4):
+for page in range (10):
     reviewDatesP = driver.find_elements(By.XPATH,"//span[@class='dtreviewed']")
     reviewContentsP = driver.find_elements(By.XPATH,"//span[@class='description item']")
     for i in reviewDatesP:
@@ -71,9 +70,18 @@ reviewsPositive = zip(datesP,contentsP,pos)
 reviewsPositiveList = list(reviewsPositive)
 
 allReviews = reviewsNegativeList + reviewsPositiveList
-with open('reviewdata.csv','w') as out:
-    csv_out=csv.writer(out)
-    csv_out.writerows(allReviews)
+Alldata = pd.DataFrame(allReviews)
+Alldata.columns=['DATE','REVIEW','RATING']
+Alldata.dropna(subset =["DATE","REVIEW"],inplace=True)
+
+
+
+Alldata.to_csv('reviewdata.csv',header=False)
+
+
+#with open('reviewdata.csv','w') as out:
+ #   csv_out=csv.writer(out)
+  #  csv_out.writerows(Alldata)
 t.sleep(1)
 
 driver.quit()

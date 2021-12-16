@@ -5,26 +5,26 @@ https://github.com/joeyajames/Python/blob/master/NLTK/NLTK.ipynb
 @author: starg
 """
 
-import nltk#, re, pprint
-import re
+import nltk, re, pprint
+
 import random
 import numpy as np
 import pyttsx3
 from nltk.tokenize import word_tokenize as wt, sent_tokenize as st
 import matplotlib.pyplot as plt
-#import csv
+
 from string import punctuation
 import pandas as pd
 
 from gensim.models import Word2Vec#, KeyedVectors
-#from textblob import TextBlob
+from textblob import TextBlob
 #text2speech = pyttsx3.init()
 #text2speech.say("welcome to the jungle, we got fun and games, we got everything you want honey we got the names")
-#text2speech.runAndWait()
+# text2speech.runAndWait()
 
 
 #import data as dataframe
-df = pd.read_csv(r'reviewdata.csv',header=[0])
+df = pd.read_csv(r'Selenium/reviewdata.csv',header=[0])
 df.columns=['DATE','REVIEW','RATING']
 #remove null values from dataframe
 df.dropna(subset =["DATE","REVIEW"],inplace=True)
@@ -40,6 +40,7 @@ stopList.extend(punctuation)
 #extract the reviews from tuple
 reviews = list(df['REVIEW'].values)
 ratings = list(df['RATING'].values)
+split = len(reviews)//2
 positive, negative = reviews[100:], reviews[:100]
   
 
@@ -79,7 +80,7 @@ for review in sad:
     for i in review:
         if i not in stopList:
             sadtokens.append(i)        
-model = Word2Vec(filtered_reviews, min_count=2, vector_size=32)
+model = Word2Vec(filtered_reviews, min_count=2)
 model.wv.most_similar('happy')   
 
 #plot frequency distribution from most common
