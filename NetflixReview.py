@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Dec  1 20:34:39 2021
-https://github.com/joeyajames/Python/blob/master/NLTK/NLTK.ipynb
+to get useful data, want to apply data cleaning techniques in logical order.
+tokenize the documents into simple and complex sentences
 @author: starg
 """
 
@@ -24,8 +25,8 @@ from textblob import TextBlob
 
 
 #import data as dataframe
-df = pd.read_csv(r'Selenium/reviewdata.csv',header=[0])
-df.columns=['DATE','REVIEW','RATING']
+df = pd.read_csv(r'Selenium/CanonReviewdata.csv',header=[0])
+df.columns=['INDEX','DATE','REVIEW','RATING']
 #remove null values from dataframe
 df.dropna(subset =["DATE","REVIEW"],inplace=True)
 
@@ -40,9 +41,11 @@ stopList.extend(punctuation)
 #extract the reviews from tuple
 reviews = list(df['REVIEW'].values)
 ratings = list(df['RATING'].values)
-split = len(reviews)//2
-positive, negative = reviews[100:], reviews[:100]
-  
+
+
+ #tokenize sentences 
+ 
+sents = [st(review) for review in reviews]
 
 
 #tokenize each review   
@@ -67,7 +70,7 @@ for i in reviews_in_words:
         filtered_words.append(w)
         
 
-    #each word represented by a vector based on it's relation to other words
+
 happy, sad = reviews_in_words[:100], reviews_in_words[100:]
 happytokens = []
 sadtokens = []
@@ -79,7 +82,10 @@ for review in happy:
 for review in sad:
     for i in review:
         if i not in stopList:
-            sadtokens.append(i)        
+            sadtokens.append(i)   
+            
+#each word represented by a vector based on it's relation to other words,
+# words appearing together frequently will have similar vectors 
 model = Word2Vec(filtered_reviews, min_count=2)
 model.wv.most_similar('happy')   
 
@@ -105,8 +111,8 @@ def review_features(review):
 #for each document record which words featured and which class
 #(pos,neg) the document falls into
 featuresets = [(review_features(d), c) for (d,c) in tnt]
-    
-train_set, test_set = featuresets[100:], featuresets[:100]  
+split = len(featuresets)    
+train_set, test_set = featuresets[split:], featuresets[:split]  
 
 #trains the classifier to class reviews good and bad by showing it good and bad reviews.
 classifier =  nltk.NaiveBayesClassifier.train(train_set)

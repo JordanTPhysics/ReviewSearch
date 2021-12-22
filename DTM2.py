@@ -15,7 +15,7 @@ import scipy
 from gensim import matutils, models
 
 
-df = pd.read_csv(r'reviewdata.csv',header=[0])
+df = pd.read_csv(r'Selenium/reviewdata.csv',header=[0])
 
 df.columns=['DATE','REVIEW','RATING']
 df.dropna(subset =["DATE","REVIEW"],inplace=True)
@@ -52,7 +52,7 @@ vect = CountVectorizer()
 DTMvectors = vect.fit_transform(data_clean.REVIEW)
 
 
-td = pd.DataFrame(DTMvectors.todense()).iloc[:259]
+td = pd.DataFrame(DTMvectors.todense()).iloc[:len(data_clean)]
 td.columns = vect.get_feature_names()
 
 sparse_counts = scipy.sparse.csr_matrix(td)

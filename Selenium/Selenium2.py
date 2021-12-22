@@ -34,7 +34,7 @@ cookies.click()
 
 for page in range (10):
     reviewDates = driver.find_elements(By.XPATH,"//p[@class='small text-muted mb-3']")
-    reviewContents = driver.find_elements(By.XPATH,"//div[@class='jss511']")
+    reviewContents = driver.find_elements(By.XPATH,"//div[@class='']")
     
     
     for i in reviewDates: 

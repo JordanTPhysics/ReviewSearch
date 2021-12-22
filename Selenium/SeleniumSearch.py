@@ -17,11 +17,12 @@ import pandas as pd
 
 
 
+
+company = input("enter Titled company name, make sure it's spelled the same on customerservicescoreboard.com':")
+URL = "https://www.customerservicescoreboard.com/"+company
+
 driver = webdriver.Chrome('chromedriver.exe')
-
-
-
-driver.get("https://www.customerservicescoreboard.com/NetFlix")
+driver.get(URL)
 t.sleep(1)
 contentsN = []
 datesN = []
@@ -38,14 +39,14 @@ for page in range (10):
         contentsN.append(contentN)
         neg.append("neg")
     pagenum = str(page+2)
-    driver.get("https://www.customerservicescoreboard.com/NetFlix/negative/?page="+pagenum)
+    driver.get(URL+"/negative/?page="+pagenum)
     
 
 reviewsNegative = zip(datesN,contentsN,neg)
 reviewsNegativeList = list(reviewsNegative)
 
 ##collecting positive reviews
-driver.get("https://www.customerservicescoreboard.com/NetFlix")
+driver.get(URL)
 positiveSwitch = driver.find_element(By.XPATH,"//a[contains(text(),'Positive')]")
 positiveSwitch.click()
 contentsP = []
@@ -63,7 +64,7 @@ for page in range (10):
         contentP = i.text
         contentsP.append(contentP)
     pagenum = str(page+2)
-    driver.get("https://www.customerservicescoreboard.com/NetFlix/positive/?page="+pagenum)
+    driver.get(URL+"/positive/?page="+pagenum)
     
     
 reviewsPositive = zip(datesP,contentsP,pos)
@@ -76,7 +77,7 @@ Alldata.dropna(subset =["DATE","REVIEW"],inplace=True)
 
 
 
-Alldata.to_csv('reviewdata.csv',header=False)
+Alldata.to_csv(company+'Reviewdata.csv',header=False)
 
 
 #with open('reviewdata.csv','w') as out:

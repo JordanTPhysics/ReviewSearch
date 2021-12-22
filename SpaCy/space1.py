@@ -9,7 +9,7 @@ import spacy
 import re
 import pandas as pd
 import string
-
+import textacy
 from whatlies.language import SpacyLanguage
 from spacy.language import Language
 import gensim
@@ -21,22 +21,36 @@ from gensim.models import CoherenceModel
 #calculate syntactic dependencies, scan for named entities e.g. Netflix and then classify text
 nlp = spacy.load("en_core_web_md")
 lang = SpacyLanguage("en_core_web_md")
-extra_stops = ['netflix','customer','service']
+#nlp.Defaults.stop_words.remove('no')
+extra_stops = ['netflix','customer','service','account','movies','like','no']
 nlp.Defaults.stop_words.update(extra_stops)
 
-df = pd.read_csv(r'reviewdata.csv',header=[0])
+
+
+
+# create textacy model using large spaCy model
+en = textacy.load_spacy_lang("en_core_web_md")
+df = pd.read_csv(r'../Selenium/reviewdata.csv',header=[0])
 stopList = nlp.Defaults.stop_words
 df.columns=['DATE','REVIEW','RATING']
 df.dropna(subset =["DATE","REVIEW"],inplace=True)
 df = df.sort_index()
 
+texts = {
+    "text": df.REVIEW,
+    "date": df.DATE,
+    "rating": df.RATING
+}
+corpus = textacy.Corpus(lang=en, data=texts)
+# check corpus stats
+corpus.n_docs, corpus.n_sents, corpus.n_tokens
 def clean_text_round1(text):
     #lowercase
     text = text.lower()
     #replace square brackets and content inside with ''
     text = re.sub('\[.*?\]', '', text)
     #remove instances of punctuation
-    text = re.sub('[%s]' % re.escape(string.punctuation), '', text)
+    #text = re.sub('[%s]' % re.escape(string.punctuation), '', text)
     #remove numbers and words attached to numbers
     text = re.sub('\w*\d\w*', '', text)
     return text
@@ -50,6 +64,8 @@ def clean_text_round2(text):
     text = re.sub('[‘’“”…]', '', text)
     text = re.sub('\n', '', text)
     text = re.sub('\r', '', text)
+    text = re.sub(' nt ','',text)
+    text = re.sub(' ve ','',text)
     return text
 
 round2 = lambda x: clean_text_round2(x)
@@ -62,7 +78,10 @@ filtered_docs = []
 for doc in docs:
     tokens = [token.text for token in doc if not token.is_stop]
     filtered_docs.append(tokens)
-
+#bot = docs[10]._.to_bag_of_terms(ngrams=(1, 2, 3), entities=True, weighting="count", as_strings=True)
+ngrams = textacy.extract.basics.ngrams(docs[10], 2)
+for i in ngrams:
+    print(next(ngrams))
 df['FILTERED'] = filtered_docs    
 
 words = corpora.Dictionary(filtered_docs)
