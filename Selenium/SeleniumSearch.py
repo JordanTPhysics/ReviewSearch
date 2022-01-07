@@ -10,7 +10,7 @@ Selenium in python time!!!!
 from selenium import webdriver
 import time as t
 from selenium.webdriver.common.by import By
-import csv
+
 import pandas as pd
 
 
@@ -28,7 +28,7 @@ contentsN = []
 datesN = []
 neg = [] 
 ##collecting negative reviews
-for page in range (10):
+for page in range(10):
     reviewDatesN = driver.find_elements(By.XPATH,"//span[@class='dtreviewed']")
     reviewContentsN = driver.find_elements(By.XPATH,"//span[@class='description item']")
     for i in reviewDatesN:
@@ -52,7 +52,7 @@ positiveSwitch.click()
 contentsP = []
 datesP = []
 pos = [] 
-for page in range (10):
+for page in range(10):
     reviewDatesP = driver.find_elements(By.XPATH,"//span[@class='dtreviewed']")
     reviewContentsP = driver.find_elements(By.XPATH,"//span[@class='description item']")
     for i in reviewDatesP:
