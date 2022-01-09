@@ -2,6 +2,9 @@
 """
 Created on Mon Dec 20 15:51:09 2021
 finding an optimal pipeline for useful language data
+try to find the optimal coherence and perplexity for an LDA model
+Add a method to filter reviews with sentiment scores at certain thresholds
+
 @author: starg
 """
 
@@ -18,6 +21,7 @@ import matplotlib.pyplot as plt
 # import scipy
 # from gensim import matutils
 # from sklearn.manifold import TSNE
+from gensim.models import CoherenceModel
 import matplotlib.colors as mcolors
 import matplotlib.dates
 from wordcloud import WordCloud
@@ -74,7 +78,7 @@ for doc in reviewWords:
         all_unfiltered.append(word)
 #apply sentence tokenizing before punctuation removal to preserve sentence structure
 
-sents = [st(review) for review in reviews]
+#sents = [st(review) for review in reviews]
 
         
 ############## NGRAMMER ###############
@@ -142,8 +146,6 @@ all_words = []
 
 for doc in clean_bigrams:
     lem = [lemmatize_with_postag(word) for word in doc]
-    
-    
     for word in lem:
         if word not in stopList:
             all_words.append(word)
@@ -209,20 +211,27 @@ df['Lemmas'] = lems
 
 ################## LDA MODEL #################
 
+#create a dictionary of all the words found 
 words = gensim.corpora.Dictionary([d for d in lems])
-
+#change the number of topics to look for here
+LDAtopics = 5
+#converts to bag of words
 corpus = [words.doc2bow(doc) for doc in lems]
 
 LDA = gensim.models.ldamodel.LdaModel(corpus = corpus,
                                       id2word = words,
-                                      num_topics = 4,
+                                      num_topics = LDAtopics,
                                       random_state=2,
                                       update_every=1,
                                       passes=10,
                                       alpha='auto',
                                       per_word_topics=True)
 LDA.print_topics()
-
+#minimize this for maximum efficiency of LDA model
+print('LDA model perplexity: ', LDA.log_perplexity(corpus))
+coherence_model_lda = CoherenceModel(model=LDA, texts=lems, dictionary=words, coherence='c_v')
+coherence_lda = coherence_model_lda.get_coherence()
+print('\nCoherence Score: ', coherence_lda)
 
 def format_topics_sentences(ldamodel=LDA, corpus=corpus, texts=lems):
     # Init output
@@ -257,39 +266,33 @@ doc_model = [LDA.get_document_topics(doc) for doc in corpus]
 xs = []
 ys = []
 multis = []
-t1 = 0
-t2 = 0
-t3 = 0
-t4 = 0
+topics = [0 for i in range(LDAtopics)]
+labels = ['topic '+str(i) for i in range(LDAtopics)]
 for i in doc_model:
-    if len(i)>1:  #doc has multiple topics
-        multis.append(i)
-    else:
+    
         theta = i[0][0]
-        if theta == 0:
-            t1 +=1
-        elif theta == 1:
-            t2+=1
-        elif theta == 2: 
-            t3+=1
-        elif theta == 3: 
-            t4+=1
+        topics[theta] += 1
         r = i[0][1]
         xs.append(theta)
         ys.append(r)
 area = 200
 colors = 2 * np.pi * np.random.rand(len(xs))
 plots = plt.figure()
-#ax = plots.add_subplot(projection='polar',label="Document-topic allocation")
+ax = plots.add_subplot(projection='polar',label="Document-topic allocation")
 
-#c = ax.scatter(xs, ys, c=colors, s=area, cmap='hsv', alpha=0.75)
+c = ax.scatter(xs, ys, c=colors, s=area, cmap='hsv', alpha=0.75)
 
 
 
-plt.bar(['topic 1','topic 2','topic 3','topic 4'],[t1,t2,t3,t4])
-plt.title("Document-topic allocation")
-plt.ylabel("doc count. Total: "+str(len(xs)))
-plt.show()
+#plt.bar(labels,topics)
+#plt.title("Document-topic allocation")
+#plt.ylabel("doc count. Total: "+str(len(xs)))
+#plt.show()
+
+for topic in LDA.print_topics():
+    print("Topic: ")
+    print(topic)
+
 ################## WORDCLOUD ##########################
 
 
