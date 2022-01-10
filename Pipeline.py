@@ -10,6 +10,8 @@ Add a method to filter reviews with sentiment scores at certain thresholds
 
 import nltk, re, numpy as np, pandas as pd
 from nltk.tokenize import word_tokenize as wt, sent_tokenize as st
+import pyLDAvis
+import pyLDAvis.gensim_models
 import gensim
 import string
 from nltk.stem import WordNetLemmatizer
@@ -214,7 +216,7 @@ df['Lemmas'] = lems
 #create a dictionary of all the words found 
 words = gensim.corpora.Dictionary([d for d in lems])
 #change the number of topics to look for here
-LDAtopics = 5
+LDAtopics = 8
 #converts to bag of words
 corpus = [words.doc2bow(doc) for doc in lems]
 
@@ -229,9 +231,16 @@ LDA = gensim.models.ldamodel.LdaModel(corpus = corpus,
 LDA.print_topics()
 #minimize this for maximum efficiency of LDA model
 print('LDA model perplexity: ', LDA.log_perplexity(corpus))
-coherence_model_lda = CoherenceModel(model=LDA, texts=lems, dictionary=words, coherence='c_v')
-coherence_lda = coherence_model_lda.get_coherence()
-print('\nCoherence Score: ', coherence_lda)
+# coherence_model_lda = CoherenceModel(model=LDA, texts=lems, dictionary=words, coherence='c_v')
+# coherence_lda = coherence_model_lda.get_coherence()
+# print('\nCoherence Score: ', coherence_lda)
+
+
+
+
+lda_vis = pyLDAvis.gensim_models.prepare(LDA, corpus, words)
+pyLDAvis.display(lda_vis)
+pyLDAvis.save_html(lda_vis, './FileModel'+ str(LDAtopics) +'.html')
 
 def format_topics_sentences(ldamodel=LDA, corpus=corpus, texts=lems):
     # Init output
@@ -277,17 +286,17 @@ for i in doc_model:
         ys.append(r)
 area = 200
 colors = 2 * np.pi * np.random.rand(len(xs))
-plots = plt.figure()
-ax = plots.add_subplot(projection='polar',label="Document-topic allocation")
+#plots = plt.figure()
+#ax = plots.add_subplot(projection='polar',label="Document-topic allocation")
 
-c = ax.scatter(xs, ys, c=colors, s=area, cmap='hsv', alpha=0.75)
+#c = ax.scatter(xs, ys, c=colors, s=area, cmap='hsv', alpha=0.75)
 
 
 
-#plt.bar(labels,topics)
-#plt.title("Document-topic allocation")
-#plt.ylabel("doc count. Total: "+str(len(xs)))
-#plt.show()
+plt.bar(labels,topics)
+plt.title("Document-topic allocation")
+plt.ylabel("doc count. Total: "+str(len(xs)))
+plt.show()
 
 for topic in LDA.print_topics():
     print("Topic: ")
