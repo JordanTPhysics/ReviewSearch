@@ -23,11 +23,14 @@ import matplotlib.pyplot as plt
 # import scipy
 # from gensim import matutils
 # from sklearn.manifold import TSNE
-from gensim.models import CoherenceModel
+#from gensim.models import CoherenceModel
 import matplotlib.colors as mcolors
 import matplotlib.dates
 from wordcloud import WordCloud
 from dateutil import parser
+
+
+import venn
 
 ########## INIT DATA ############
 
@@ -38,7 +41,7 @@ df.columns=['DATE','REVIEW','RATING']
 df.dropna(subset =["DATE","REVIEW"],inplace=True)
 stopList = list(nltk.corpus.stopwords.words('english'))
 #additional stopwords
-stopList.extend(['get','netflix','u'])
+stopList.extend(['get','netflix','u','ve'])
 lemmatizer = WordNetLemmatizer()
 punct = string.punctuation +"``“”£"
 
@@ -157,7 +160,7 @@ for doc in clean_bigrams:
     
     
 df['Lemmas'] = lems    
-
+df.to_csv('netflixAnalyzed.csv', encoding='utf-8')
 # pos_revs = []
 # neg_revs = []
 # for i in range(len(lems)):
@@ -216,7 +219,7 @@ df['Lemmas'] = lems
 #create a dictionary of all the words found 
 words = gensim.corpora.Dictionary([d for d in lems])
 #change the number of topics to look for here
-LDAtopics = 8
+LDAtopics = 16
 #converts to bag of words
 corpus = [words.doc2bow(doc) for doc in lems]
 
@@ -269,7 +272,8 @@ def format_topics_sentences(ldamodel=LDA, corpus=corpus, texts=lems):
 
 df_topic_sents_keywords = format_topics_sentences(ldamodel=LDA, corpus=corpus, texts=lems)
 
-
+df['Dominant_topic'] = df_topic_sents_keywords.Dominant_Topic
+df['Topic_contribution'] = df_topic_sents_keywords.Perc_Contribution
 
 doc_model = [LDA.get_document_topics(doc) for doc in corpus]
 xs = []
@@ -286,6 +290,11 @@ for i in doc_model:
         ys.append(r)
 area = 200
 colors = 2 * np.pi * np.random.rand(len(xs))
+
+#venn_labels = venn.get_labels(doc_model,fill=['logic','number'])
+#fig, ax = venn.venn2(venn_labels, names=labels)
+#fig.savefig('venn2.png', bbox_inches='tight')
+#plt.close()
 #plots = plt.figure()
 #ax = plots.add_subplot(projection='polar',label="Document-topic allocation")
 
