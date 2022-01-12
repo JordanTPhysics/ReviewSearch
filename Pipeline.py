@@ -30,15 +30,17 @@ from wordcloud import WordCloud
 from dateutil import parser
 
 
-import venn
+#import venn
 
 ########## INIT DATA ############
 
 df = pd.read_csv(r'Selenium/reviewdata.csv',header=[0])
-df.columns=['DATE','REVIEW','RATING']
+df.columns=['Index','Date','Review','Rating']
+df.drop(columns=['Index'])
+df = df[['Review','Rating','Date']]
 #df.columns=['AUTHOR','COMMENT','REVIEW','RATING']
 #remove null values from dataframe
-df.dropna(subset =["DATE","REVIEW"],inplace=True)
+df.dropna(subset =["Date","Review"],inplace=True)
 stopList = list(nltk.corpus.stopwords.words('english'))
 #additional stopwords
 stopList.extend(['get','netflix','u','ve'])
@@ -50,11 +52,11 @@ def untokenize(doc):
     
     return review 
    
-reviews = list(df['REVIEW'].values)
-ratings = list(df['RATING'].values)
-dates = list(df['DATE'].values)
+reviews = list(df['Review'].values)
+ratings = list(df['Rating'].values)
+dates = list(df['Date'].values)
 dates = [parser.parse(date) for date in dates]
-df['DATE'] = dates
+df['Date'] = dates
 
 ########### SENTIMENT ANALYSIS ##################
 sents = []
@@ -70,7 +72,7 @@ df['Subjectivity'] = subs
 
 ## plot of review sentiment as a function of time
 
-dates = matplotlib.dates.date2num(df['DATE'])
+dates = matplotlib.dates.date2num(df['Date'])
 plt.plot_date(dates, df['Polarity'])
 plt.title("sentiment over time")
 plt.ylabel('Polarity')
@@ -160,7 +162,7 @@ for doc in clean_bigrams:
     
     
 df['Lemmas'] = lems    
-df.to_csv('netflixAnalyzed.csv', encoding='utf-8')
+
 # pos_revs = []
 # neg_revs = []
 # for i in range(len(lems)):
@@ -274,6 +276,17 @@ df_topic_sents_keywords = format_topics_sentences(ldamodel=LDA, corpus=corpus, t
 
 df['Dominant_topic'] = df_topic_sents_keywords.Dominant_Topic
 df['Topic_contribution'] = df_topic_sents_keywords.Perc_Contribution
+
+
+df.dropna(subset =['Dominant_topic','Topic_contribution'],inplace=True)
+df.to_csv('database_netflix.csv')
+
+doms = list(df['Dominant_topic'])
+
+doc_groups = [[] for i in range(LDAtopics)]
+for i in range(len(lems)):
+    dom = int(doms[i])
+    doc_groups[dom].append(lems[i])
 
 doc_model = [LDA.get_document_topics(doc) for doc in corpus]
 xs = []
