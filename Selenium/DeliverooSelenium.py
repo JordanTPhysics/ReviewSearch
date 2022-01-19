@@ -50,9 +50,9 @@ allReviews = zip(dates,contents)
 
 
 
-#with open('reviewdata.csv','w') as out:
-#    csv_out=csv.writer(out)
- #   csv_out.writerows(allReviews)
-#t.sleep(1)
+with open('Deliveroodata.csv','w') as out:
+    csv_out=csv.writer(out)
+    csv_out.writerows(allReviews)
+t.sleep(1)
 
 driver.quit()

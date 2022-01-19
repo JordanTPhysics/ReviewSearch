@@ -19,35 +19,33 @@ driver = webdriver.Chrome('chromedriver.exe')
 reviewContents = []
 reviewDates = []
 starRating = []
-posneg = []
-pos = "pos"
-neg = "neg"
-driver.get("https://www.getapp.co.uk/reviews/2035411/whatsapp")
+
+
+driver.get("https://www.getapp.com/customer-management-software/a/whatsapp/reviews/")
 t.sleep(1)
-cookies = driver.find_element(By.ID,"onetrust-accept-btn-handler")
-cookies.click()
+try:
+    cookies = driver.find_element(By.ID,"onetrust-accept-btn-handler")
+    cookies.click()
+except:
+    pass
 
 
 
-
-
-
-for page in range (10):
-    reviewDates = driver.find_elements(By.XPATH,"//p[@class='small text-muted mb-3']")
-    reviewContents = driver.find_elements(By.XPATH,"//div[@class='']")
+for page in range(3):
+    
+    reviewContent = driver.find_elements(By.XPATH,"//div[@class='MuiCollapse-wrapperInner']")
+    reviewDate = driver.find_elements(By.XPATH,"//div[@class='MuiAccordionDetails-root jss463 Details jss484']")               
+    reviewRating = driver.find_elements(By.XPATH,"//meta[@itemprop='ratingValue']")
+    
+    for i in reviewContent:
+        reviewContents.append(i.text)
+    for i in reviewDate:
+        reviewDates.append(i.text)
+    for i in reviewRating:
+        reviewRating.append(i.text)
     
     
-    for i in reviewDates: 
-        reviewDates.append(i)
-        
-    
-    for i in reviewContents:
-        content = i.text
-        reviewContents.append(content)
-        if "Pros" in reviewContents:
-            posneg.append(pos)
-        else:
-            posneg.append(neg)     
+   
     
     pagenum = str(page+2)
     driver.get("https://www.getapp.com/customer-management-software/a/whatsapp/reviews/page-"+pagenum+"/")
