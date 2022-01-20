@@ -34,15 +34,15 @@ except:
 for page in range(3):
     
     reviewContent = driver.find_elements(By.XPATH,"//div[@class='MuiCollapse-wrapperInner']")
-    reviewDate = driver.find_elements(By.XPATH,"//div[@class='MuiAccordionDetails-root jss463 Details jss484']")               
+    reviewDate = driver.find_elements(By.XPATH,"//div[@class='MuiAccordionDetails-root jss463 Details jss484']")           
     reviewRating = driver.find_elements(By.XPATH,"//meta[@itemprop='ratingValue']")
     
     for i in reviewContent:
         reviewContents.append(i.text)
     for i in reviewDate:
-        reviewDates.append(i.text)
+        reviewDates.append(i.get_attribute('innerhtml'))
     for i in reviewRating:
-        reviewRating.append(i.text)
+        reviewRating.append(i.get_attribute('innerhtml'))
     
     
    
