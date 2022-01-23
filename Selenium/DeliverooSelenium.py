@@ -12,14 +12,18 @@ from selenium import webdriver
 import time as t
 from selenium.webdriver.common.by import By
 import csv
-
+import os
+import pandas as pd
+from dateutil import parser
+import mysql.connector
 
 
 
 
 driver = webdriver.Chrome('chromedriver.exe')
 
-
+sql_user = os.environ['MYSQL_USER']
+sql_pass = os.environ['MYSQL_PASS']
 
 driver.get("https://apps.apple.com/gb/app/apple-store/id375380948#see-all/reviews")
 t.sleep(1)
@@ -43,16 +47,45 @@ for i in reviewRatings:
         ratings.append(source_code[92])    
    
     
-
-allReviews = zip(dates,contents)
-
-
-
-
-
-with open('Deliveroodata.csv','w') as out:
-    csv_out=csv.writer(out)
-    csv_out.writerows(allReviews)
-t.sleep(1)
-
 driver.quit()
+
+allReviews = zip(contents,dates,ratings)
+
+
+
+Alldata = pd.DataFrame(allReviews)
+Alldata.columns=['REVIEW','DATE','RATING']
+Alldata = Alldata.apply(lambda x: x.str.strip()).replace('', np.nan)
+Alldata = Alldata.dropna(axis=0)
+dates = list(Alldata['DATE'].values)
+dates = [parser.parse(date) for date in dates]
+Alldata['DATE'] = dates
+Alldata['Company'] = 'Apple'
+Alldata = Alldata[['Company','REVIEW','DATE','RATING']]
+
+x = Alldata.values.tolist()
+data = []
+for i in x:
+    i = tuple(i)
+    data.append(i)
+
+db = mysql.connector.connect(host="localhost", user=sql_user, passwd=sql_pass)
+pointer = db.cursor()
+pointer.execute("use reviewdata")  
+    
+add_data = ("INSERT INTO customerservicescoreboard "
+               "(company_id, review, date, rating) "
+               "VALUES (%s, %s, %s, %s)")
+
+pointer.executemany(add_data,data)
+db.commit()
+    
+
+    
+pointer.close()
+db.close()   
+
+
+
+
+

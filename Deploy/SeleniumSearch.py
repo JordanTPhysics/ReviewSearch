@@ -9,7 +9,6 @@ Selenium in python time!!!!
 
 from selenium import webdriver
 import time as t
-import os
 from selenium.webdriver.common.by import By
 from dateutil import parser
 import pandas as pd
@@ -20,8 +19,6 @@ import numpy as np
 
 
 ######## INIT #########
-sql_user = os.environ['MYSQL_USER']
-sql_pass = os.environ['MYSQL_PASS']
 company = input("enter Titled company name, make sure it's spelled the same on customerservicescoreboard.com':")
 URL = "https://www.customerservicescoreboard.com/"+company
 length = 1
@@ -101,7 +98,7 @@ data = list(map(lambda x: tuple(x),Dflist))
 
 ############ DATABASE PUSH ###############
 
-db = mysql.connector.connect(host="localhost", user=sql_user, passwd=sql_pass)
+db = mysql.connector.connect(host="localhost", user="admin", passwd="appletreez123")
 pointer = db.cursor()
 pointer.execute("use reviewdata")  
     

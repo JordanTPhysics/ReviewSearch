@@ -2,7 +2,7 @@
 """
 Created on Wed Dec 2 2021 14:49
 Selenium in python time!!!!
-##### EYE TEST DECEMBER 11 13:10 #####
+
 
 @author: starg
 """
@@ -12,7 +12,10 @@ import selenium as sl
 from selenium import webdriver
 import time as t
 from selenium.webdriver.common.by import By
+import os
 
+sql_user = os.environ['MYSQL_USER']
+sql_pass = os.environ['MYSQL_PASS']
 
 driver = webdriver.Chrome('chromedriver.exe')
 
@@ -22,34 +25,31 @@ starRating = []
 
 
 driver.get("https://www.getapp.com/customer-management-software/a/whatsapp/reviews/")
-t.sleep(1)
+t.sleep(3)
 try:
-    cookies = driver.find_element(By.ID,"onetrust-accept-btn-handler")
+    cookies = driver.find_element(By.XPATH,"//button[@class='optanon-allow-all accept-cookies-button']")
     cookies.click()
 except:
     pass
 
 
 
-for page in range(3):
+
     
-    reviewContent = driver.find_elements(By.XPATH,"//div[@class='MuiCollapse-wrapperInner']")
-    reviewDate = driver.find_elements(By.XPATH,"//div[@class='MuiAccordionDetails-root jss463 Details jss484']")           
-    reviewRating = driver.find_elements(By.XPATH,"//meta[@itemprop='ratingValue']")
+reviews = driver.find_elements(By.XPATH,"//p[contains(@class,'CollapsibleText')]")
+reviewtexts = list(map(lambda x: x.text,reviews))
+        
+reviewDate = driver.find_elements(By.XPATH,"//span[contains(@class,'jss541')]")           
+reviewRating = driver.find_elements(By.XPATH,"//meta[contains(@itemprop,'ratingValue')]")
+                                                
     
-    for i in reviewContent:
-        reviewContents.append(i.text)
-    for i in reviewDate:
-        reviewDates.append(i.get_attribute('innerhtml'))
-    for i in reviewRating:
-        reviewRating.append(i.get_attribute('innerhtml'))
     
     
    
     
-    pagenum = str(page+2)
-    driver.get("https://www.getapp.com/customer-management-software/a/whatsapp/reviews/page-"+pagenum+"/")
-    t.sleep(1)
+#pagenum = str(page+2)
+#driver.get("https://www.getapp.com/customer-management-software/a/whatsapp/reviews/page-"+pagenum+"/")
+t.sleep(1)
 
 
 driver.quit()
