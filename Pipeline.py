@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import matplotlib.dates
 from wordcloud import WordCloud
-
+import os
 import mysql.connector
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
@@ -30,14 +30,19 @@ warnings.filterwarnings("ignore")
 
 
 ############ INIT DATA ############
-USERNAME = input('enter mysql username: ')
-PASSWORD = input('enter mysql password: ')
+
+USERNAME = os.environ['MYSQL_USER']
+PASSWORD = os.environ['MYSQL_PASS']
+
+
+#USERNAME = input('enter mysql username: ')
+#PASSWORD = input('enter mysql password: ')
 db = mysql.connector.connect(host="localhost", user=f"{USERNAME}", passwd=f"{PASSWORD}")
 pointer = db.cursor()
 pointer.execute("use reviewdata")
 TABLE_NAME = input('Choose an sql table: ')
 COMPANY = input('choose a company: ')
-pointer.execute(f"SELECT * FROM {TABLE_NAME}")
+pointer.execute(f"SELECT DISTINCT * FROM {TABLE_NAME} WHERE company_id='{COMPANY}'")
 df = pointer.fetchall()
 df = pd.DataFrame(df,columns =['Index','Company','Review','Date','Rating'])
 
@@ -57,7 +62,7 @@ def untokenize(doc):
 reviews = list(df['Review'].values)
 ratings = list(df['Rating'].values)
 
-df.to_csv('CanonReviewdata.csv',header=False)
+#df.to_csv('CanonReviewdata.csv',header=False)
 ########### SENTIMENT ANALYSIS ##################
 sents = list(map(lambda x: TextBlob(x).sentiment.polarity, reviews))
 subs = list(map(lambda x: TextBlob(x).sentiment.subjectivity, reviews))
