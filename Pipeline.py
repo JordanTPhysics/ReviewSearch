@@ -12,6 +12,8 @@ class A(object):
         self.__dict__.update({k: v for k, v in locals().items() if k != 'self'})
 
 
+
+
 @author: starg
 """
 

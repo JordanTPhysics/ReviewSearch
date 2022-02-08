@@ -13,6 +13,8 @@ import mysql.connector
 from dateutil import parser
 import re
 import pandas as pd
+from pathlib import Path  
+
 
 
 
@@ -98,7 +100,9 @@ company_id = [company for i in range(len(reviews))]
 
 datagrid = list(zip(company_id,previews,reviews,dates,ratings,likes))
 df = pd.DataFrame(datagrid, columns=['company_id','preview','review','date','rating','likes'])
-df.to_csv(company+'Reviewdata.csv',header=False)
+
+filepath = Path(f'../Data/{company}Reviewdata.csv')
+df.to_csv(filepath,header=False)
 
 ####### SQL COMMIT #######
 

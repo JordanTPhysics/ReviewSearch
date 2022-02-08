@@ -15,7 +15,7 @@ from dateutil import parser
 import pandas as pd
 import mysql.connector
 import numpy as np
-
+from pathlib import Path  
 
 
 
@@ -41,8 +41,8 @@ CREATE TABLE `customerservicescoreboard` (
 sql_user = os.environ['MYSQL_USER']
 sql_pass = os.environ['MYSQL_PASS']
 company = input("enter Titled company name, make sure it's spelled the same on customerservicescoreboard.com':")
-URL = "https://www.customerservicescoreboard.com/"+company
-length = 9
+URL = f"https://www.customerservicescoreboard.com/{company}"
+length = 1
 
 
 contentsN = []
@@ -66,7 +66,7 @@ for page in range(length):
         contentsN.append(contentN)
         neg.append("neg")
     pagenum = str(page+2)
-    driver.get(URL+"/negative/?page="+pagenum)
+    driver.get(f"{URL}/negative/?page={pagenum}")
     
 
 reviewsNegative = zip(contentsN,datesN,neg)
@@ -91,7 +91,7 @@ for page in range(length):
         contentP = i.text
         contentsP.append(contentP)
     pagenum = str(page+2)
-    driver.get(URL+"/positive/?page="+pagenum)
+    driver.get(f"{URL}/positive/?page={pagenum}")
     
 
 driver.quit()
@@ -135,9 +135,12 @@ db.commit()
 
     
 pointer.close()
-db.close()   
+db.close()  
 
-Alldata.to_csv(company+'Reviewdata.csv',header=False)
+filepath = Path(f'../Data/{company}Reviewdata.csv')
+Alldata.to_csv(filepath,header=False) 
+
+
 
 
 t.sleep(1)
