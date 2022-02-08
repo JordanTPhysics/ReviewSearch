@@ -17,11 +17,26 @@ import pandas as pd
 from dateutil import parser
 import mysql.connector
 
+"""
+before running the script, create a mysql table:
 
+CREATE TABLE `applestore` (
+  `review_id` int NOT NULL AUTO_INCREMENT,
+  `company_id` varchar(45) NOT NULL,
+  `preview` varchar(255) NOT NULL,
+  `review` text NOT NULL,
+  `date` datetime NOT NULL,
+  `rating` varchar(45) NOT NULL,
+  UNIQUE KEY `review_id_UNIQUE` (`review_id`),
+  UNIQUE KEY `preview_UNIQUE` (`preview`)
+) ENGINE=InnoDB AUTO_INCREMENT=4283 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+"""
 
 
 driver = webdriver.Chrome('chromedriver.exe')
 
+#to make this work set sql username and password as environment variables
 sql_user = os.environ['MYSQL_USER']
 sql_pass = os.environ['MYSQL_PASS']
 
@@ -60,8 +75,9 @@ Alldata = Alldata.dropna(axis=0)
 dates = list(Alldata['DATE'].values)
 dates = [parser.parse(date) for date in dates]
 Alldata['DATE'] = dates
+Alldata['PREVIEW'] = list(map(lambda x: x[:254],Alldata['REVIEW']))
 Alldata['Company'] = 'Apple'
-Alldata = Alldata[['Company','REVIEW','DATE','RATING']]
+Alldata = Alldata[['Company','PREVIEW','REVIEW','DATE','RATING']]
 
 x = Alldata.values.tolist()
 data = []
@@ -73,9 +89,9 @@ db = mysql.connector.connect(host="localhost", user=sql_user, passwd=sql_pass)
 pointer = db.cursor()
 pointer.execute("use reviewdata")  
     
-add_data = ("INSERT INTO customerservicescoreboard "
-               "(company_id, review, date, rating) "
-               "VALUES (%s, %s, %s, %s)")
+add_data = ("INSERT INTO applestore "
+               "(company_id, preview, review, date, rating) "
+               "VALUES (%s, %s, %s, %s, %s, %s)")
 
 pointer.executemany(add_data,data)
 db.commit()

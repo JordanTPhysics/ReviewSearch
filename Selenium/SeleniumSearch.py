@@ -20,11 +20,29 @@ import numpy as np
 
 
 ######## INIT #########
+
+
+"""
+before running the script, create a mysql table:
+
+CREATE TABLE `customerservicescoreboard` (
+  `review_id` int NOT NULL AUTO_INCREMENT,
+  `company_id` varchar(45) NOT NULL,
+  `preview` varchar(255) NOT NULL,
+  `review` text NOT NULL,
+  `date` datetime NOT NULL,
+  `rating` varchar(45) NOT NULL,
+  UNIQUE KEY `review_id_UNIQUE` (`review_id`),
+  UNIQUE KEY `preview_UNIQUE` (`preview`)
+) ENGINE=InnoDB AUTO_INCREMENT=4283 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+"""
+
 sql_user = os.environ['MYSQL_USER']
 sql_pass = os.environ['MYSQL_PASS']
 company = input("enter Titled company name, make sure it's spelled the same on customerservicescoreboard.com':")
 URL = "https://www.customerservicescoreboard.com/"+company
-length = 1
+length = 9
 
 
 contentsN = []
@@ -93,7 +111,8 @@ dates = list(Alldata['DATE'].values)
 dates = [parser.parse(date) for date in dates]
 Alldata['DATE'] = dates
 Alldata['Company'] = company
-Alldata = Alldata[['Company','REVIEW','DATE','RATING']]
+Alldata['PREVIEW'] = list(map(lambda x: x[:254],Alldata['REVIEW']))
+Alldata = Alldata[['Company','PREVIEW','REVIEW','DATE','RATING']]
 
 Dflist = Alldata.values.tolist()
 data = list(map(lambda x: tuple(x),Dflist))
@@ -105,11 +124,12 @@ db = mysql.connector.connect(host="localhost", user=sql_user, passwd=sql_pass)
 pointer = db.cursor()
 pointer.execute("use reviewdata")  
     
-add_data = ("INSERT INTO customerservicescoreboard "
-               "(company_id, review, date, rating) "
-               "VALUES (%s, %s, %s, %s)")
+add_data = ("INSERT IGNORE INTO customerservicescoreboard "
+               "(company_id, preview, review, `date`, rating) "
+               "VALUES (%s, %s, %s, %s, %s)")
 
 pointer.executemany(add_data,data)
+pointer.fetchall()
 db.commit()
     
 
@@ -117,7 +137,7 @@ db.commit()
 pointer.close()
 db.close()   
 
-#Alldata.to_csv(company+'Reviewdata.csv',header=False)
+Alldata.to_csv(company+'Reviewdata.csv',header=False)
 
 
 t.sleep(1)

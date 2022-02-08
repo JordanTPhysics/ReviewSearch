@@ -12,6 +12,7 @@ import os
 import mysql.connector
 from dateutil import parser
 import re
+import pandas as pd
 
 
 
@@ -20,14 +21,31 @@ sql_user = os.environ['MYSQL_USER']
 sql_pass = os.environ['MYSQL_PASS']
 BASE_URL = 'https://www.consumeraffairs.com/'
 
-company = input('type the department, followed by a / then the company name: ')
+"""
+before running the script, create a mysql table:
+
+CREATE TABLE `consumeraffairs` (
+  `review_id` int NOT NULL AUTO_INCREMENT,
+  `company_id` varchar(45) NOT NULL,
+  `preview` varchar(255) NOT NULL,
+  `review` text NOT NULL,
+  `date` datetime NOT NULL,
+  `rating` varchar(45) NOT NULL,
+  `likes` varchar(45) NOT NULL,
+  UNIQUE KEY `review_id_UNIQUE` (`review_id`),
+  UNIQUE KEY `preview_UNIQUE` (`preview`)
+) ENGINE=InnoDB AUTO_INCREMENT=4283 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+"""
+department = input('type the department name: ')
+company = input('type company name: ')
 #### here's one for reference
 
 #company = 'entertainment/netflix'
 
 driver = webdriver.Chrome('chromedriver.exe')
 
-driver.get(f'{BASE_URL}{company}.html')
+driver.get(f'{BASE_URL}{department}/{company}.html')
 pages = 3
 
 
@@ -37,8 +55,10 @@ dates = []
 ratings = []
 likes = []
 
-while True:
-#for i in range(pages):
+
+#use while True to crawl the entire page
+#while True:
+for i in range(pages):
     content = driver.find_elements(By.XPATH,"//div[@class='rvw-bd']")
     rating = driver.find_elements(By.XPATH,"//meta[@itemprop='ratingValue']")
     like = driver.find_elements(By.XPATH,"//span[@class='rvw-foot__helpful-count js-helpful-count']")
@@ -65,19 +85,20 @@ driver.quit()
 
 
 dates = list(map(lambda x: x[17:],dates))
-for i in dates:
-    if 'se:' in i:
-        i = re.sub('se:','',i)
-
+dates = [re.sub('se: ','',i) for i in dates]
 dates = [parser.parse(date) for date in dates]
 ratings = list(map(lambda x: x[38:39],ratings))
 likes = list(map(lambda x: x[:2],likes))
+for i in range(len(likes)):
+    if likes[i] == 'Be':
+        likes[i] = 0
+previews = list(map(lambda x: x[:254],reviews))
 
 company_id = [company for i in range(len(reviews))]
 
-datagrid = list(zip(company_id,reviews,dates,ratings,likes))
-
-
+datagrid = list(zip(company_id,previews,reviews,dates,ratings,likes))
+df = pd.DataFrame(datagrid, columns=['company_id','preview','review','date','rating','likes'])
+df.to_csv(company+'Reviewdata.csv',header=False)
 
 ####### SQL COMMIT #######
 
@@ -85,14 +106,20 @@ db = mysql.connector.connect(host="localhost", user=sql_user, passwd=sql_pass)
 pointer = db.cursor()
 pointer.execute("use reviewdata")  
     
-add_data = ("INSERT INTO consumeraffairs "
-               "(company_id, review, date, rating, likes) "
-               "VALUES (%s, %s, %s, %s, %s)")
+add_data = (
+"INSERT IGNORE INTO consumeraffairs " 
+"(company_id, preview, review, `date`, rating, likes) "
+"VALUES (%s, %s, %s, %s, %s, %s) "
+)
+
+
 
 pointer.executemany(add_data,datagrid)
-db.commit()
-    
 
-    
+
+
+pointer.fetchall()
+db.commit()
 pointer.close()
+
 db.close()   

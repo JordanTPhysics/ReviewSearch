@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 """
 Created on Mon Dec 20 15:51:09 2021
@@ -5,11 +6,17 @@ finding an optimal pipeline for useful language data
 try to find the optimal coherence and perplexity for an LDA model
 Add a method to filter reviews with sentiment scores at certain thresholds
 
+for initializing class variables fast
+class A(object):
+    def __init__(self, a, b, c, d, e, f):
+        self.__dict__.update({k: v for k, v in locals().items() if k != 'self'})
+
+
 @author: starg
 """
 
 import nltk, re, numpy as np, pandas as pd
-from nltk.tokenize import word_tokenize as wt, sent_tokenize as st
+from nltk.tokenize import word_tokenize as wt#, sent_tokenize as st
 import pyLDAvis
 import pyLDAvis.gensim_models
 import gensim
@@ -42,15 +49,18 @@ pointer = db.cursor()
 pointer.execute("use reviewdata")
 TABLE_NAME = input('Choose an sql table: ')
 COMPANY = input('choose a company: ')
-pointer.execute(f"SELECT DISTINCT * FROM {TABLE_NAME} WHERE company_id='{COMPANY}'")
+pointer.execute(f"SELECT * FROM {TABLE_NAME} WHERE company_id='{COMPANY}'")
 df = pointer.fetchall()
-df = pd.DataFrame(df,columns =['Index','Company','Review','Date','Rating'])
-
-
+try:
+    df = pd.DataFrame(df,columns =['Index','Company','Preview','Review','Date','Rating','Likes'])
+    print('likes included')
+except:
+    df = pd.DataFrame(df,columns =['Index','Company','Preview','Review','Date','Rating'])
+    
 
 stopList = list(nltk.corpus.stopwords.words('english'))
 #additional stopwords
-stopList.extend(['get','netflix','u','ve'])
+stopList.extend(['get','netflix','u','ve','\'t'])
 lemmatizer = WordNetLemmatizer()
 punct = string.punctuation +"``“”£"
 
@@ -76,7 +86,22 @@ dates = matplotlib.dates.date2num(df['Date'])
 plt.plot_date(dates, df['Polarity'])
 plt.title("sentiment over time")
 plt.ylabel('Polarity')
+plt.xlabel('review time')
 plt.show()
+
+df['Month'] = df['Date'].dt.month
+data_score = df.groupby("Month", as_index=False) \
+.agg(('count', 'mean')) \
+.reset_index()
+
+
+
+# plt.plot(data_score['Month'], data_score['Rating']['mean'])
+# plt.title('Average Star Rating per month')
+# plt.xlabel('last 12 months')
+# plt.ylabel('Rating out 5')
+# plt.axhline(data_score['Rating']['mean'].mean(), color='green', linestyle='--')
+# plt.show()
 
 ##plot of review length against sentiment
 lengths = list(map(lambda x: len(x),reviews))
@@ -161,15 +186,30 @@ def lemmatize_with_postag(sentence):
 
 lems = []
 all_words = []
-
-for doc in clean_bigrams:
-    lem = [lemmatize_with_postag(word) for word in doc]
+pos_words = []
+neg_words = []
+for i in range(len(clean_bigrams)):
+    lem = [lemmatize_with_postag(word) for word in clean_bigrams[i]]
     for word in lem:
         if word not in stopList:
             all_words.append(word)
+            try:
+                if  df['Rating'][i] == 'pos':
+                    pos_words.append(word)
+                else:
+                    neg_words.append(word)
+            except:
+                if  df['Rating'][i] > 3:
+                    pos_words.append(word)
+                else:
+                    neg_words.append(word)
     lems.append(lem)
     
-    
+pos_freq = nltk.FreqDist(pos_words)
+pos_freq.plot(20,cumulative=False, title = 'positive feedback words')
+
+neg_freq = nltk.FreqDist(neg_words)
+neg_freq.plot(20,cumulative=False, title = 'negative feedback words') 
     
     
 df['Lemmas'] = lems    
@@ -289,8 +329,7 @@ class Review(Base):
 SQLdf = pd.DataFrame(data=[df['Company'],df['Review'],df['Date'],df['Polarity'],df['Topic_words'],df['Topic_number'],df['Topic_Sentiment_Average']])
 SQLdf = SQLdf.T
 
-engine = create_engine(f'mysql://{USERNAME}:{PASSWORD}@localhost:3306/reviewdata', echo=True)
-SQLdf.to_sql(f'{COMPANY}analysis',engine)
+
 
 
 
@@ -311,7 +350,7 @@ for i in doc_model:
 area = 200
 colors = 2 * np.pi * np.random.rand(len(xs))
 
-
+"Uncomment to see a pretty plot"
 #plots = plt.figure()
 #ax = plots.add_subplot(projection='polar',label="Document-topic allocation")
 
@@ -368,7 +407,8 @@ print(len(all_unfiltered)-len(all_words))
 frequency_graph = nltk.FreqDist(all_words)
 frequency_graph.plot(20,cumulative=False)
 
-
+engine = create_engine(f'mysql://{USERNAME}:{PASSWORD}@localhost:3306/reviewdata', echo=True)
+SQLdf.to_sql(f'{COMPANY}analysis',engine)
 
 
 
