@@ -29,11 +29,10 @@ import gensim.corpora
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import matplotlib.dates
-from wordcloud import WordCloud
+
 import os
 import mysql.connector
-from sqlalchemy import *
-from sqlalchemy.ext.declarative import declarative_base
+
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -62,9 +61,10 @@ except:
 
 stopList = list(nltk.corpus.stopwords.words('english'))
 #additional stopwords
+
 stopList.extend(['get','netflix','u','ve','\'t'])
 lemmatizer = WordNetLemmatizer()
-punct = string.punctuation +"``“”£"
+punct = string.punctuation + "``“”£"
 
 def untokenize(doc):
     review = " ".join(doc)
@@ -211,7 +211,9 @@ pos_freq = nltk.FreqDist(pos_words)
 pos_freq.plot(20,cumulative=False, title = 'positive feedback words')
 
 neg_freq = nltk.FreqDist(neg_words)
-neg_freq.plot(20,cumulative=False, title = 'negative feedback words') 
+neg_freq.plot(20,cumulative=False, title = 'negative feedback words')
+
+
     
     
 df['Lemmas'] = lems    
@@ -353,17 +355,17 @@ area = 200
 colors = 2 * np.pi * np.random.rand(len(xs))
 
 "Uncomment to see a pretty plot"
-#plots = plt.figure()
-#ax = plots.add_subplot(projection='polar',label="Document-topic allocation")
+plots = plt.figure()
+ax = plots.add_subplot(projection='polar',label="Document-topic allocation")
 
-#c = ax.scatter(xs, ys, c=colors, s=area, cmap='hsv', alpha=0.75)
+c = ax.scatter(xs, ys, c=colors, s=area, cmap='hsv', alpha=0.75)
 
 
 
-plt.bar(labels,topics)
-plt.title("Document-topic allocation")
-plt.ylabel("doc count. Total: "+str(len(xs)))
-plt.show()
+# plt.bar(labels,topics)
+# plt.title("Document-topic allocation")
+# plt.ylabel("doc count. Total: "+str(len(xs)))
+# plt.show()
 
 for topic in LDA.print_topics():
     print("Topic: ")
