@@ -39,16 +39,16 @@ CREATE TABLE `consumeraffairs` (
 ) ENGINE=InnoDB AUTO_INCREMENT=4283 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 """
-department = input('type the department name: ')
-company = input('type company name: ')
+#department = input('type the department name: ')
+#company = input('type company name: ')
 #### here's one for reference
 
-#company = 'entertainment/netflix'
+company = 'entertainment/netflix'
 
 driver = webdriver.Chrome('chromedriver.exe')
 
-driver.get(f'{BASE_URL}{department}/{company}.html')
-pages = 3
+driver.get(f'{BASE_URL}{company}.html')
+pages = 1
 
 
 ########### WEBCRAWLER ###########
@@ -59,8 +59,8 @@ likes = []
 
 
 #use while True to crawl the entire page
-#while True:
-for i in range(pages):
+while True:
+#for i in range(pages):
     content = driver.find_elements(By.XPATH,"//div[@class='rvw-bd']")
     rating = driver.find_elements(By.XPATH,"//meta[@itemprop='ratingValue']")
     like = driver.find_elements(By.XPATH,"//span[@class='rvw-foot__helpful-count js-helpful-count']")
@@ -101,29 +101,29 @@ company_id = [company for i in range(len(reviews))]
 datagrid = list(zip(company_id,previews,reviews,dates,ratings,likes))
 df = pd.DataFrame(datagrid, columns=['company_id','preview','review','date','rating','likes'])
 
-filepath = Path(f'../Data/{company}Reviewdata.csv')
-df.to_csv(filepath,header=False)
+filepath = Path(f'../Data/{company}data.csv')
+df.to_csv(f'../Data/data.csv')
 
-####### SQL COMMIT #######
+# ####### SQL COMMIT #######
 
-db = mysql.connector.connect(host="localhost", user=sql_user, passwd=sql_pass)
-pointer = db.cursor()
-pointer.execute("use reviewdata")  
+# db = mysql.connector.connect(host="localhost", user=sql_user, passwd=sql_pass)
+# pointer = db.cursor()
+# pointer.execute("use reviewdata")  
     
-add_data = (
-"INSERT IGNORE INTO consumeraffairs " 
-"(company_id, preview, review, `date`, rating, likes) "
-"VALUES (%s, %s, %s, %s, %s, %s) "
-)
+# add_data = (
+# "INSERT IGNORE INTO consumeraffairs " 
+# "(company_id, preview, review, `date`, rating, likes) "
+# "VALUES (%s, %s, %s, %s, %s, %s) "
+# )
 
 
 
-pointer.executemany(add_data,datagrid)
+# pointer.executemany(add_data,datagrid)
 
 
 
-pointer.fetchall()
-db.commit()
-pointer.close()
+# pointer.fetchall()
+# db.commit()
+# pointer.close()
 
-db.close()   
+# db.close()   

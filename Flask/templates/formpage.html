@@ -1,0 +1,18 @@
+{% extends 'main.html' %}
+
+{% block content %}
+    <h1>{% block title %} NLP analysis {% endblock %}</h1>
+    <div class="form">
+        <span>
+            Submit some data in CSV format to be analysed
+        </span>
+         <form method="post" enctype = "multipart/form-data">
+            <label class="element" for="category">Upload</label> <br><br>
+            
+            <input type="file" id="csvfile" name="csvfile" value="csvfile">
+
+            <input type="submit" value="Submit" class="btn">
+
+        </form>
+    </div>
+{% endblock %}

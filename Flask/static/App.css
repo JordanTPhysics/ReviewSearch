@@ -1,0 +1,81 @@
+
+:root{
+  --primary-colour: #0d1d31;
+  --secondary-colour: #0c0d13;
+  --light-colour: rgb(170, 134, 36);
+  --red-colour: rgb(95, 10, 21);
+
+}
+
+
+.App {
+  text-align: center;
+  width: 100vw;
+  height: 100vh;
+   
+}
+.content{
+  
+  position: relative;
+  
+}
+
+
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap');
+
+
+
+
+
+
+
+
+
+
+body {
+  font-family: 'Playfair Display', serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at bottom, var(--primary-colour) 0%, var(--secondary-colour) 100%);
+  overflow: hidden;
+  
+}
+
+
+
+
+
+

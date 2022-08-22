@@ -29,7 +29,7 @@ import gensim.corpora
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import matplotlib.dates
-
+import WordCloud
 import os
 import mysql.connector
 
@@ -160,6 +160,8 @@ def clean_text_round1(text):
     text = re.sub('[%s]' % re.escape(punct), '', text)
     #remove numbers and words attached to numbers
     text = re.sub('\w*\d\w*', '', text)
+    #remove /r and /n
+    text = re.sub('\w*/\D*\w*', '', text)
     
     return text
 clean_bigrams = []
@@ -315,23 +317,7 @@ for i in range(len(topnum)):
     
 df['Topic_Sentiment_Average'] = average_values
 
-Base = declarative_base()
 
-class Review(Base):
-    __tablename__ = f'{COMPANY}analysis'
-    # Here we define columns for the table
-    # Notice that each column is also a normal Python instance attribute.
-    id = Column(Integer, primary_key=True)
-    company_id = Column(String(250), nullable=False)
-    review = Column(String(250), nullable=False)
-    date = Column(DATETIME(), nullable=False)
-    polarity = Column(FLOAT)
-    topic_words = Column(String(500))
-    dominant_topic = Column(Integer)
-    topic_average = Column(FLOAT)
-
-SQLdf = pd.DataFrame(data=[df['Company'],df['Review'],df['Date'],df['Polarity'],df['Topic_words'],df['Topic_number'],df['Topic_Sentiment_Average']])
-SQLdf = SQLdf.T
 
 
 
@@ -354,18 +340,18 @@ for i in doc_model:
 area = 200
 colors = 2 * np.pi * np.random.rand(len(xs))
 
-"Uncomment to see a pretty plot"
-plots = plt.figure()
-ax = plots.add_subplot(projection='polar',label="Document-topic allocation")
+# "Uncomment to see a pretty plot"
+# plots = plt.figure()
+# ax = plots.add_subplot(projection='polar',label="Document-topic allocation")
 
-c = ax.scatter(xs, ys, c=colors, s=area, cmap='hsv', alpha=0.75)
+# c = ax.scatter(xs, ys, c=colors, s=area, cmap='hsv', alpha=0.75)
 
 
 
-# plt.bar(labels,topics)
-# plt.title("Document-topic allocation")
-# plt.ylabel("doc count. Total: "+str(len(xs)))
-# plt.show()
+plt.bar(labels,topics)
+plt.title("Document-topic allocation")
+plt.ylabel("doc count. Total: "+str(len(xs)))
+plt.show()
 
 for topic in LDA.print_topics():
     print("Topic: ")
@@ -410,10 +396,6 @@ print(len(all_unfiltered)-len(all_words))
 
 frequency_graph = nltk.FreqDist(all_words)
 frequency_graph.plot(20,cumulative=False)
-
-engine = create_engine(f'mysql://{USERNAME}:{PASSWORD}@localhost:3306/reviewdata', echo=True)
-SQLdf.to_sql(f'{COMPANY}analysis',engine)
-
 
 
 
