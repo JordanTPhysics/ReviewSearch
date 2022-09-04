@@ -5,7 +5,7 @@ selenium crawler on canterbury historic tours just for fun
 @author: starg
 """
 import numpy as np
-import matplotlib.pyplot as plt
+
 import selenium as sl
 from selenium import webdriver
 import time as t
@@ -14,6 +14,7 @@ import csv
 import dateutil.parser
 import os
 import mysql.connector
+import pandas as pd
 
 ######## INIT ########
 sql_user = os.environ['MYSQL_USER']
@@ -46,6 +47,16 @@ while True:
     readMore = driver.find_elements(By.XPATH,"//div[@class='dlJyA']")
    # for i in readMore:
   #      i.click()
+  
+    rev_block = driver.find_elements(By.XPATH,"//div[@class='lgfjP Gi z pBVnE MD bZHZM']")
+    
+    
+    for i in rev_block:
+        
+    
+    
+    
+    
     reviewRatings = driver.find_elements(By.XPATH,"//div[@class='emWez F1']")
     reviewDates = driver.find_elements(By.XPATH,"//span[@class='euPKI _R Me S4 H3']")
     reviewContents = driver.find_elements(By.XPATH,"//q[@class='XllAv H4 _a']")
@@ -81,25 +92,31 @@ company_id = ["CHRT" for i in range(len(contents))]
 
 datagrid = list(zip(company_id,contents,dates,ratings,likes))
 
+df = pd.DataFrame(datagrid, columns=['company_id','review','date','rating','likes'])
 
-db = mysql.connector.connect(host="localhost", user=sql_user, passwd=sql_pass)
-pointer = db.cursor()
-pointer.execute("use reviewdata")  
+df.to_csv('../Data/rivertourdata.csv')
+
+
+
+
+# db = mysql.connector.connect(host="localhost", user=sql_user, passwd=sql_pass)
+# pointer = db.cursor()
+# pointer.execute("use reviewdata")  
         
-add_data = (
-"INSERT IGNORE INTO chrt " 
-"(company_id, review, `date`, rating, likes) "
-"VALUES (%s, %s, %s, %s, %s) "
-)
+# add_data = (
+# "INSERT IGNORE INTO chrt " 
+# "(company_id, review, `date`, rating, likes) "
+# "VALUES (%s, %s, %s, %s, %s) "
+# )
 
 
 
-pointer.executemany(add_data,datagrid)
+# pointer.executemany(add_data,datagrid)
 
 
 
-pointer.fetchall()
-db.commit()
-pointer.close()
+# pointer.fetchall()
+# db.commit()
+# pointer.close()
 
-db.close()   
+# db.close()   

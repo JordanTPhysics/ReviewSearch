@@ -1,0 +1,61 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<div>
+    
+    <div class="container">
+    <div class="row">
+        <div class="col-md-2">
+        </div>
+        <div class="col-md-8">
+            <h3>Analysis </h3>
+        <br>
+        <p>This algorithm uses the NLP libraries gensim, nltk and TextBlob to clean, preprocess and prepare the input text data.
+             NLP analysis using Latent Dirichlet Allocation is performed to group the reviews into topical categories, and by their sentiment scores.
+                
+            </p>
+            <p>Here the frequencies of words are shown, starting from most common:</p> <br>
+            <image src="{{ url_for('static',filename='figures/freqDist.png') }}" class="img-fluid rounded"> <br>
+            
+            <p>The moving average sentiment over time, calculated by cumulative sentiment over number of reviews:</p> <br>
+                
+            <image src="{{ url_for('static',filename='figures/polarity.png') }}" class="img-fluid rounded"> <br>
+
+
+                <p>The following table shows the words for each topic found by the LDA model</p>
+                <table id="topics" class="table table-light table-responsive rounded table-bordered table-striped" >
+                    <thead class="thead-dark">
+                    <tr>
+                        <th>Topic Number </th>
+                    <th>  Topic Words </th>
+                    </tr>
+                </thead>
+                    <tr>
+                    {% for i, topic in topics.items() %}
+    
+                    <td><strong>{{ i }}</strong></td>
+                    
+                    <td> {{ ",    ".join(topic)  }}</td> 
+    
+                </tr>
+            {% endfor %}  
+                </table> <br>
+                <p> The following graph shows the frequency of each topic in the corpus,
+                    representing the primary focus of user reviews </p>
+            <image src="{{ url_for('static',filename='figures/lda_dist.png') }}" class="img-fluid rounded"> <br>
+                <p>For each topic the average sentiment is displayed:
+                </p> <br>
+            <image src="{{ url_for('static',filename='figures/topicsentavg.png') }}" class="img-fluid rounded"> <br>
+            
+       
+        </div>
+        
+    </div>
+</div>
+<script> 
+
+</script>
+</div>
+
+{% endblock %} 

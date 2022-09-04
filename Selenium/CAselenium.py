@@ -43,7 +43,7 @@ CREATE TABLE `consumeraffairs` (
 #company = input('type company name: ')
 #### here's one for reference
 
-company = 'entertainment/netflix'
+company = 'home_electronics/nintendo'
 
 driver = webdriver.Chrome('chromedriver.exe')
 
@@ -102,7 +102,7 @@ datagrid = list(zip(company_id,previews,reviews,dates,ratings,likes))
 df = pd.DataFrame(datagrid, columns=['company_id','preview','review','date','rating','likes'])
 
 filepath = Path(f'../Data/{company}data.csv')
-df.to_csv(f'../Data/data.csv')
+df.to_csv(f'../Data/{company}data.csv')
 
 # ####### SQL COMMIT #######
 

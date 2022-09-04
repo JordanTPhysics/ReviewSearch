@@ -9,8 +9,8 @@ import scrapy
 
 class ReviewSpider(scrapy.spider):
     
-    name = 'review'
-    start_urls = []
+    name = 'facebook'
+    start_urls = ['https://m.facebook.com/pg/CanterburyRiverTours/reviews']
     
     def parse(self, response):
         
